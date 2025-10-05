@@ -139,11 +139,11 @@ void Map::paintEvent(QPaintEvent *event)
     m_painter->begin(m_pixmap);
     for (int i = 0; i < m_size; ++i) {
         for (int j = 0; j < m_size; ++j) {
-            QRect rect(i*m_cellSize, j*m_cellSize, m_cellSize, m_cellSize);
+            QRect rct(i*m_cellSize, j*m_cellSize, m_cellSize, m_cellSize);
             if (m_grid->isAlive(i, j))
-                m_painter->fillRect(rect, m_aliveColor);
+                m_painter->fillRect(rct, m_aliveColor);
             else
-                m_painter->fillRect(rect, m_bgColor);
+                m_painter->fillRect(rct, m_bgColor);
         }
     }
     m_painter->end();
@@ -154,14 +154,14 @@ void Map::paintEvent(QPaintEvent *event)
 
 void Map::mousePressEvent(QMouseEvent *event)
 {
+    if (event->button() != Qt::LeftButton)
+        return;
     bool timerState = m_timer.isActive();   // memorise timer state
     m_timer.stop();
-    if (event->button() == Qt::LeftButton) {
-        QPoint pos = event->pos();
-        int x = pos.x() / m_cellSize;
-        int y = pos.y() / m_cellSize;
-        m_grid->flip(x, y);
-    }
+    QPoint pos = event->pos();
+    int x = pos.x() / m_cellSize;
+    int y = pos.y() / m_cellSize;
+    m_grid->flip(x, y);
     if (timerState) // restore timer if it was active
         m_timer.start(m_timeout);
     else

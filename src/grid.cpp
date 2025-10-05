@@ -9,6 +9,7 @@ Grid::Grid(int size)
 }
 
 Grid::Grid(const QImage &image)
+    : QImage(image)
 {
     setColor(DEAD, qRgb(0, 0, 0));
     setColor(ALIVE, qRgb(255, 255, 0));
