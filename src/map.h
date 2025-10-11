@@ -33,11 +33,15 @@ private:
     unsigned long m_score;
     Grid *m_grid;
     bool m_loadGrid;
-    QPixmap *m_pixmap;
+    bool m_hover;
 
+    QPoint m_trackedCell;
+
+    QPixmap *m_pixmap;
     QPainter *m_painter;
     QColor m_bgColor;
     QColor m_aliveColor;
+    QColor m_highLight;
 
     void updateGrid();
 
@@ -49,6 +53,9 @@ public slots:
 protected:
     void paintEvent(QPaintEvent *event);
     void mousePressEvent(QMouseEvent *event);
+    void mouseMoveEvent(QMouseEvent *event);
+    void enterEvent(QEnterEvent *event);
+    void leaveEvent(QEvent *event);
 };
 
 #endif // MAP_H

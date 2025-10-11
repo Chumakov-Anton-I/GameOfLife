@@ -7,12 +7,13 @@
 
 Map::Map(int size, QWidget *parent)
     : QWidget{parent}, m_timeout{10}, m_size{size}, m_cellSize{6},
-    m_grid{nullptr}, m_loadGrid{false}, m_pixmap{nullptr},
-    m_bgColor{Qt::black}, m_aliveColor{Qt::yellow}
+    m_grid{nullptr}, m_loadGrid{false}, m_hover{false}, m_pixmap{nullptr},
+    m_bgColor{Qt::black}, m_aliveColor{Qt::yellow}, m_highLight{QColor(255, 255, 255, 192)}
 {
     m_painter = new QPainter;
     onReset();
     connect(&m_timer, &QTimer::timeout, this, QOverload<>::of(&Map::update));
+    setMouseTracking(true);
 }
 
 Map::~Map()
@@ -146,6 +147,10 @@ void Map::paintEvent(QPaintEvent *event)
                 m_painter->fillRect(rct, m_bgColor);
         }
     }
+    if (m_hover) {
+        QRect rct(m_trackedCell*m_cellSize, QSize(m_cellSize, m_cellSize));
+        m_painter->fillRect(rct, m_highLight);
+    }
     m_painter->end();
     m_painter->begin(this);
     m_painter->drawPixmap(m_pixmap->rect(), *m_pixmap);
@@ -158,12 +163,35 @@ void Map::mousePressEvent(QMouseEvent *event)
         return;
     bool timerState = m_timer.isActive();   // memorise timer state
     m_timer.stop();
-    QPoint pos = event->pos();
-    int x = pos.x() / m_cellSize;
-    int y = pos.y() / m_cellSize;
-    m_grid->flip(x, y);
+    m_grid->flip(m_trackedCell.x(), m_trackedCell.y());
     if (timerState) // restore timer if it was active
         m_timer.start(m_timeout);
     else
         update();
+}
+
+void Map::mouseMoveEvent(QMouseEvent *event)
+{
+    QPoint pos = event->pos();
+    QPoint newPos(pos.x() / m_cellSize, pos.y() / m_cellSize);
+    if (m_trackedCell != newPos) {
+        m_trackedCell = newPos;
+        if (!m_timer.isActive())
+            update();
+    }
+    QWidget::mouseMoveEvent(event);
+}
+
+void Map::enterEvent(QEnterEvent *event)
+{
+    m_hover = true;
+    update();
+    QWidget::enterEvent(event);
+}
+
+void Map::leaveEvent(QEvent *event)
+{
+    m_hover = false;
+    update();
+    QWidget::leaveEvent(event);
 }
